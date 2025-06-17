@@ -11,7 +11,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://fitpage-frontend.onrender.com",
+    origin: ["https://fitpage-frontend.onrender.com", "http://localhost:5173"],
     credentials: true, 
   })
 );

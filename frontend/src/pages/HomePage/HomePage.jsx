@@ -8,21 +8,28 @@ const HomePage = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loadProducts = async () => {
-      const data = await fetchProducts();
-      setProducts(data);
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [productsData, usersData] = await Promise.all([
+          fetchProducts(),
+          fetchUsers(),
+        ]);
+        setProducts(productsData);
+        setUsers(usersData);
+      } catch (error) {
+        console.error("Error loading data:", error);
+        setErrorMessage("Failed to load data. Please refresh the page.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const loadUsers = async () => {
-      const usersData = await fetchUsers();
-      setUsers(usersData);
-    };
-
-    loadProducts();
-    loadUsers();
+    loadData();
   }, []);
 
   const handleProductClick = (productId) => {
@@ -34,6 +41,14 @@ const HomePage = () => {
     setErrorMessage("");
     navigate(`/product/${productId}?userId=${selectedUser.id}`);
   };
+
+  if (loading) {
+    return (
+      <div className="home-container">
+        <div style={{ textAlign: "center", padding: "50px" }}>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="home-container">
