@@ -84,9 +84,7 @@ export const fetchRatings = async (productId) => {
 
 // Fetch average rating for a product
 export const fetchAverageRating = async (productId) => {
-  const response = await apiClient.get(
-    `/ratings/${productId}/average`
-  );
+  const response = await apiClient.get(`/ratings/${productId}/average`);
   return response.data;
 };
 
@@ -103,10 +101,7 @@ export const addReview = async (productId, reviewData) => {
 
 // add a rating
 export const addRating = async (productId, ratingData) => {
-  const response = await apiClient.post(
-    `/ratings/${productId}`,
-    ratingData
-  );
+  const response = await apiClient.post(`/ratings/${productId}`, ratingData);
   return response.data;
 };
 

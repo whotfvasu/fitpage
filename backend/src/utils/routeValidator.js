@@ -1,4 +1,4 @@
-import pkg from 'path-to-regexp';
+import pkg from "path-to-regexp";
 const { pathToRegexp } = pkg;
 
 /**
@@ -24,28 +24,31 @@ export const validateRoutePattern = (pattern) => {
  * @param {string} basePath - Base path prefix
  * @returns {Array} Array of invalid routes
  */
-export const validateRoutes = (router, basePath = '') => {
+export const validateRoutes = (router, basePath = "") => {
   const invalidRoutes = [];
-  
+
   // Check if router has routes (Express 4.x style)
   if (router.stack) {
-    router.stack.forEach(layer => {
+    router.stack.forEach((layer) => {
       if (layer.route) {
         // This is a route
-        const fullPath = basePath + (layer.route.path || '');
+        const fullPath = basePath + (layer.route.path || "");
         if (!validateRoutePattern(fullPath)) {
           invalidRoutes.push({
             path: fullPath,
-            methods: Object.keys(layer.route.methods)
+            methods: Object.keys(layer.route.methods),
           });
         }
-      } else if (layer.name === 'router' && layer.handle.stack) {
+      } else if (layer.name === "router" && layer.handle.stack) {
         // This is a sub-router
-        const prefix = layer.regexp.source.replace('\\/?(?=\\/|$)', '').replace(/\\\//g, '/').replace(/\^|\$/g, '');
+        const prefix = layer.regexp.source
+          .replace("\\/?(?=\\/|$)", "")
+          .replace(/\\\//g, "/")
+          .replace(/\^|\$/g, "");
         invalidRoutes.push(...validateRoutes(layer.handle, basePath + prefix));
       }
     });
   }
-  
+
   return invalidRoutes;
 };
