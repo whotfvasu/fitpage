@@ -40,7 +40,7 @@ export const getRatingsByProductId = async (req, res) => {
       [productId]
     );
     res.status(200).json(result.rows);
-  } catch {
+  } catch (error) {
     console.error("error fetching rating", error);
     res.status(500).json({ error: "failed to fetch ratings" });
   }

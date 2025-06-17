@@ -64,12 +64,12 @@ export const fetchReviews = async (productId) => {
 
 // fetch ratings for a product
 export const fetchRatings = async (productId) => {
-  const response = await apiClient.get(`${API_BASE_URL}/ratings/${productId}`);
+  const response = await apiClient.get(`/ratings/${productId}`);
   const ratings = response.data;
 
   // Get user data for each rating
   const userIds = [...new Set(ratings.map((rating) => rating.user_id))];
-  const usersResponse = await apiClient.get(`${API_BASE_URL}/users`);
+  const usersResponse = await apiClient.get(`/users`);
   const users = usersResponse.data;
 
   // Enrich ratings with user data
@@ -85,7 +85,7 @@ export const fetchRatings = async (productId) => {
 // Fetch average rating for a product
 export const fetchAverageRating = async (productId) => {
   const response = await apiClient.get(
-    `${API_BASE_URL}/ratings/${productId}/average`
+    `/ratings/${productId}/average`
   );
   return response.data;
 };
@@ -93,7 +93,7 @@ export const fetchAverageRating = async (productId) => {
 // add a review
 export const addReview = async (productId, reviewData) => {
   const { userId, reviewText, imageUrl } = reviewData;
-  const response = await apiClient.post(`${API_BASE_URL}/reviews/${productId}`, {
+  const response = await apiClient.post(`/reviews/${productId}`, {
     userId,
     reviewText,
     imageUrl,
@@ -104,7 +104,7 @@ export const addReview = async (productId, reviewData) => {
 // add a rating
 export const addRating = async (productId, ratingData) => {
   const response = await apiClient.post(
-    `${API_BASE_URL}/ratings/${productId}`,
+    `/ratings/${productId}`,
     ratingData
   );
   return response.data;
@@ -112,11 +112,11 @@ export const addRating = async (productId, ratingData) => {
 
 // fetch tags for a product
 export const fetchTags = async (productId) => {
-  const response = await apiClient.get(`${API_BASE_URL}/reviews/${productId}/tags`);
+  const response = await apiClient.get(`/reviews/${productId}/tags`);
   return response.data;
 };
 
 export const fetchUsers = async () => {
-  const response = await apiClient.get(`${API_BASE_URL}/users`);
+  const response = await apiClient.get(`/users`);
   return response.data;
 };
