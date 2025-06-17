@@ -3,8 +3,18 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import routes from "./routes/index.js";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
+import validateAllRoutes from "./utils/validateAllRoutes.js";
 
 dotenv.config();
+
+// Validate all routes before starting the server
+try {
+  validateAllRoutes();
+} catch (error) {
+  console.error("Route validation failed:", error);
+  // Continue anyway, since we have error handling middleware
+}
 
 const app = express();
 
@@ -47,18 +57,9 @@ app.get("/health", (req, res) => {
 // Register API routes with the correct path
 app.use("/api", routes);
 
-// Add this error handler
-app.use((err, req, res, next) => {
-  console.error("Error:", err);
-  res
-    .status(500)
-    .json({ error: "Something went wrong!", details: err.message });
-});
-
-// Add a catch-all 404 route
-app.use("*", (req, res) => {
-  res.status(404).json({ error: "Route not found", path: req.originalUrl });
-});
+// Add error and 404 handlers
+app.use(errorHandler);
+app.use("*", notFoundHandler);
 
 const PORT = process.env.PORT || 3000;
 

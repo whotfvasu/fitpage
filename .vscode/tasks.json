@@ -1,0 +1,12 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Downgrade Express and Fix Deployment",
+      "type": "shell",
+      "command": "cd /Users/vasuparashar/Desktop/Code/Dev/company\\ assignments/fitpage/backend && npm uninstall express && npm install express@4.18.2",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}
