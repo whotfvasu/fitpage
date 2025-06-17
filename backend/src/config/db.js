@@ -3,38 +3,71 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  ssl: { rejectUnauthorized: false }, // Add this for Supabase connections
-});
+// Logging function for database operations
+const logDbOperation = (message, isError = false) => {
+  const timestamp = new Date().toISOString();
+  const logMethod = isError ? console.error : console.log;
+  logMethod(`[${timestamp}] DB: ${message}`);
+};
 
-// Add connection testing
-pool.on("connect", () => {
-  console.log("Connected to PostgreSQL database");
-});
+// Create pool with connection retry logic
+const createDbPool = () => {
+  logDbOperation("Initializing database connection pool");
 
-pool.on("error", (err) => {
-  console.error("Database connection error:", err);
-});
+  const pool = new Pool({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    ssl: { rejectUnauthorized: false }, // Required for Supabase connections
+    connectionTimeoutMillis: 10000, // 10 seconds
+    idleTimeoutMillis: 30000, // 30 seconds
+    max: 20, // Maximum number of clients in the pool
+  });
 
-// Test connection on startup
-(async () => {
-  try {
-    const client = await pool.connect();
-    console.log("Database connection successful");
+  // Log connection events
+  pool.on("connect", () => {
+    logDbOperation("Connected to PostgreSQL database");
+  });
 
-    // Test a simple query
-    const result = await client.query("SELECT NOW()");
-    console.log("Database timestamp:", result.rows[0].now);
+  pool.on("error", (err) => {
+    logDbOperation(`Database connection error: ${err.message}`, true);
+  });
 
-    client.release();
-  } catch (err) {
-    console.error("Database connection failed:", err);
+  // Add connection testing
+  testConnection(pool);
+
+  return pool;
+};
+
+// Test database connection
+const testConnection = async (pool) => {
+  let retries = 3;
+  let connected = false;
+
+  while (retries > 0 && !connected) {
+    try {
+      const client = await pool.connect();
+      const result = await client.query("SELECT NOW()");
+      logDbOperation(`Database connection successful. Server time: ${result.rows[0].now}`);
+      client.release();
+      connected = true;
+    } catch (err) {
+      retries--;
+      logDbOperation(`Database connection failed: ${err.message}. Retries left: ${retries}`, true);
+      if (retries > 0) {
+        logDbOperation(`Retrying in 5 seconds...`);
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds before retry
+      }
+    }
   }
-})();
+
+  if (!connected) {
+    logDbOperation("All database connection attempts failed. Application will continue but database operations will likely fail.", true);
+  }
+};
+
+const pool = createDbPool();
 
 export default pool;

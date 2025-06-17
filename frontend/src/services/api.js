@@ -1,10 +1,18 @@
 import axios from "axios";
 
-// Make sure the API URL includes /api
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "https://fitpage-bov7.onrender.com/api";
+// Check environment and use appropriate API URL
+// In production, use the Render URL
+// In development, use the localhost URL with port 3000
+const isDevelopment = import.meta.env.DEV;
+const prodUrl = "https://fitpage-bov7.onrender.com/api";
+const devUrl = "http://localhost:3000/api";
 
-// Add debugging
+// Select the appropriate base URL based on environment
+// You can still override with VITE_API_URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || (isDevelopment ? devUrl : prodUrl);
+
+// Log the API URL being used
+console.log(`Environment: ${isDevelopment ? 'Development' : 'Production'}`);
 console.log("Using API URL:", API_BASE_URL);
 
 // Create an axios instance with proper error handling
@@ -13,6 +21,7 @@ const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 10000, // 10 seconds timeout
 });
 
 // Add request interceptor for debugging
@@ -27,11 +36,47 @@ apiClient.interceptors.request.use(
   }
 );
 
+// Add response interceptor for debugging
+apiClient.interceptors.response.use(
+  (response) => {
+    console.log(`API Response: ${response.config.method.toUpperCase()} ${response.config.url} - ${response.status}`);
+    return response;
+  },
+  (error) => {
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error("Response error:", error.response.status, error.response.data);
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error("No response received:", error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error("Request setup error:", error.message);
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Utility function to retry failed requests
+const retryRequest = async (fn, retries = 3, delay = 1000) => {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries <= 1) throw error;
+    console.log(`Retrying request... Attempts left: ${retries-1}`);
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return retryRequest(fn, retries - 1, delay * 2);
+  }
+};
+
 // fetch all products
 export const fetchProducts = async () => {
   try {
-    const response = await apiClient.get("/products");
-    return response.data;
+    return await retryRequest(async () => {
+      const response = await apiClient.get("/products");
+      return response.data;
+    });
   } catch (error) {
     console.error("Failed to fetch products:", error);
     throw error;
