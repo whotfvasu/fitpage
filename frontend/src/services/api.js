@@ -2,6 +2,7 @@ import axios from "axios";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "https://fitpage-bov7.onrender.com/api";
+console.log("Using API URL:", API_BASE_URL);
 
 // fetch all products
 export const fetchProducts = async () => {
