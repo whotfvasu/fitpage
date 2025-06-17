@@ -26,8 +26,7 @@ export const addRating = async (req, res) => {
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error("error adding rating", error);
-    res.status(500).json({ error: "failed to add rating" });
+    res.status(500).json({ error: "Failed to add rating" });
   }
 };
 
@@ -41,8 +40,7 @@ export const getRatingsByProductId = async (req, res) => {
     );
     res.status(200).json(result.rows);
   } catch (error) {
-    console.error("error fetching rating", error);
-    res.status(500).json({ error: "failed to fetch ratings" });
+    res.status(500).json({ error: "Failed to fetch ratings" });
   }
 };
 
@@ -56,7 +54,6 @@ export const getAverageRating = async (req, res) => {
     );
     res.status(200).json({ average_rating: result.rows[0].average_rating });
   } catch (error) {
-    console.error("Error fetching average rating:", error);
     res.status(500).json({ error: "Failed to fetch average rating" });
   }
 };
@@ -71,7 +68,6 @@ export const getRatingsByUser = async (req, res) => {
     );
     res.status(200).json(result.rows);
   } catch (error) {
-    console.error("Error fetching ratings by user:", error);
     res.status(500).json({ error: "Failed to fetch ratings by user" });
   }
 };

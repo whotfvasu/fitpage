@@ -6,7 +6,6 @@ export const addReview = async (req, res) => {
   const { userId, reviewText, imageUrl } = req.body;
 
   try {
-
     const existingReview = await pool.query(
       "SELECT * FROM reviews WHERE product_id = $1 AND user_id = $2",
       [productId, userId]
@@ -24,11 +23,9 @@ export const addReview = async (req, res) => {
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error("error adding review: ", error);
-    res.status(500).json({ error: "failed to add review" });
+    res.status(500).json({ error: "Failed to add review" });
   }
 };
-
 
 export const getReviewsByProductId = async (req, res) => {
   const { productId } = req.params;
@@ -39,8 +36,7 @@ export const getReviewsByProductId = async (req, res) => {
     );
     res.status(200).json(result.rows);
   } catch (error) {
-    console.error("error fetching reviews: ", error);
-    res.status(500).json({ error: "failed to fetch reviews" });
+    res.status(500).json({ error: "Failed to fetch reviews" });
   }
 };
 
@@ -70,7 +66,6 @@ export const generateTags = async (req, res) => {
 
     res.status(200).json({ tags });
   } catch (error) {
-    console.error("Error generating tags:", error);
     res.status(500).json({ error: "Failed to generate tags" });
   }
 };
@@ -85,7 +80,6 @@ export const getReviewsByUser = async (req, res) => {
     );
     res.status(200).json(result.rows);
   } catch (error) {
-    console.error("Error fetching reviews by user:", error);
     res.status(500).json({ error: "Failed to fetch reviews by user" });
   }
 };
